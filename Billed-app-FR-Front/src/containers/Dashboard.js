@@ -86,6 +86,7 @@ export default class {
   }
 
   handleEditTicket(e, bill, bills) {
+    e.preventDefault()
     if (this.counter === undefined || this.id !== bill.id) this.counter = 0
     if (this.id === undefined || this.id !== bill.id) this.id = bill.id
     if (this.counter % 2 === 0) {
@@ -111,6 +112,7 @@ export default class {
   }
 
   handleAcceptSubmit = (e, bill) => {
+    e.preventDefault()
     const newBill = {
       ...bill,
       status: 'accepted',
@@ -121,6 +123,7 @@ export default class {
   }
 
   handleRefuseSubmit = (e, bill) => {
+    e.preventDefault()
     const newBill = {
       ...bill,
       status: 'refused',
@@ -131,18 +134,19 @@ export default class {
   }
 
   handleShowTickets(e, bills, index) {
-    if (this.counter === undefined || this.index !== index) this.counter = 0
+    e.preventDefault()
+    if (this.count === undefined || this.index !== index) this.count = 0
     if (this.index === undefined || this.index !== index) this.index = index
-    if (this.counter % 2 === 0) {
+    if (this.count % 2 === 0) {
       $(`#arrow-icon${this.index}`).css({ transform: 'rotate(0deg)'})
       $(`#status-bills-container${this.index}`)
         .html(cards(filteredBills(bills, getStatus(this.index))))
-      this.counter ++
+      this.count ++
     } else {
       $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)'})
       $(`#status-bills-container${this.index}`)
         .html("")
-      this.counter ++
+      this.count ++
     }
 
     filteredBills(bills, getStatus(this.index)).forEach(bill => {
