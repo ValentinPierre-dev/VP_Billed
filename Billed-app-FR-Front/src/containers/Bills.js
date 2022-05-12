@@ -33,10 +33,8 @@ export default class {
       .bills()
       .list()
       .then(snapshot => {
+        console.log(snapshot)
         const bills = snapshot
-          .sort((a,b) => {
-            return (a < b) ? 1 : -1
-          })
           .map(doc => {
             try {
               return {
