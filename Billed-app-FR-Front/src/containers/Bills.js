@@ -35,12 +35,12 @@ export default class {
       .then(snapshot => {
         console.log(snapshot)
         const bills = snapshot
-          //.sort((a, b) => ((a.date < b.date) ? 1 : -1))
+          .sort((a, b) => ((a.date < b.date) ? 1 : -1))
           .map(doc => {
             try {
               return {
                 ...doc,
-                date: formatDate(doc.date),
+                formatedDate: formatDate(doc.date),
                 status: formatStatus(doc.status)
               }
             } catch(e) {
@@ -49,7 +49,7 @@ export default class {
               console.log(e,'for',doc)
               return {
                 ...doc,
-                date: doc.date,
+                //date: doc.date,
                 status: formatStatus(doc.status)
               }
             }
