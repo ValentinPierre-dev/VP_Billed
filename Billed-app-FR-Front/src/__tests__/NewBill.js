@@ -11,6 +11,7 @@ import { bills } from "../fixtures/bills"
 import router from "../app/Router"
 import userEvent from "@testing-library/user-event";
 import { use } from "express/lib/application";
+import BillsUI from "../views/BillsUI.js"
 
 jest.mock("../app/store", () => mockStore)
 
@@ -44,7 +45,7 @@ describe("Given I am connected as an employee", () => {
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({pathname})}
 
         const currentNewBill = new NewBill({document, onNavigate, store: mockStore, localStorage: localStorage})
-        const fileTest = new File(['hello'], 'hello.png', {type: 'image/png'})
+        const fileTest = new File(['menu'], 'menu.png', {type: 'image/png'})
 
         const handleChangeFile = jest.fn((e) => currentNewBill.handleChangeFile(e))
         
@@ -68,18 +69,18 @@ describe("Given I am connected as an employee", () => {
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({pathname, data: bills})}
         const currentNewBill = new NewBill({document, onNavigate, store: mockStore, localStorage: localStorage})
 
-        const fileTest = new File(['hello'], 'hello.png', {type: 'image/png'})
+        const fileTest = new File(['menu'], 'menu.png', {type: 'image/png'})
         const handleChangeFile = jest.fn((e) => currentNewBill.handleChangeFile(e))
         const selectFile = screen.getByTestId("file")
         selectFile.addEventListener('change', handleChangeFile)
         userEvent.upload(selectFile, fileTest)
-        screen.getByTestId("expense-type").value = "Transports"
-        screen.getByTestId("expense-name").value = "Vol paris nice"
-        screen.getByTestId("datepicker").value = "2021-05-25"
-        screen.getByTestId("amount").value = "300"
+        screen.getByTestId("expense-type").value = "Restaurants et bars"
+        screen.getByTestId("expense-name").value = "Restaurant Le Concept"
+        screen.getByTestId("datepicker").value = "2022-03-12"
+        screen.getByTestId("amount").value = "26"
         screen.getByTestId("vat").value = "20"
         screen.getByTestId("pct").value = "20"
-        screen.getByTestId("commentary").value = "class eco"
+        screen.getByTestId("commentary").value = "1 menu entrée - plat"
 
         const handleSubmit = jest.spyOn(currentNewBill, 'handleSubmit')
         const form = screen.getByTestId("form-new-bill")
@@ -91,6 +92,69 @@ describe("Given I am connected as an employee", () => {
         await waitFor(() => screen.getByText("Mes notes de frais"))
         const billsPage = screen.getByText("Mes notes de frais")
         expect(billsPage).toBeTruthy()
+      })
+    })
+  })
+})
+
+
+// test d'intégration POST
+describe("Given I am a user connected as Employee", () => {
+  describe("When I navigate to newBill", () => {
+    describe("When I POST a new bill", () => {
+      test("Then it should be a new bill from mock API POST", async () => {
+        const getSpy = jest.spyOn(mockStore, "bills")
+        const bill = await mockStore.bills().update();
+
+        expect(getSpy).toHaveBeenCalledTimes(1)
+        expect(bill.type).toBe("Hôtel et logement")
+      })
+    })
+
+    describe("When an error occurs on API", () => {
+      beforeEach(() => {
+        jest.spyOn(mockStore, "bills")
+        Object.defineProperty(
+            window,
+            'localStorage',
+            { value: localStorageMock }
+        )
+        window.localStorage.setItem('user', JSON.stringify({
+          type: 'Employee',
+          email: "a@a"
+        }))
+        const root = document.createElement("div")
+        root.setAttribute("id", "root")
+        document.body.appendChild(root)
+        router()
+      })
+      test("POST bills from an API and fails with 404 message error", async () => {
+  
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            upload : () =>  {
+              return Promise.reject(new Error("Erreur 404"))
+            }
+          }})
+        window.onNavigate(ROUTES_PATH.NewBill)
+        await new Promise(process.nextTick);
+        const message = await screen.getByText(/Erreur 404/)
+        expect(message).toBeTruthy()
+      })
+  
+      test("POST messages from an API and fails with 500 message error", async () => {
+  
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            upload : () =>  {
+              return Promise.reject(new Error("Erreur 500"))
+            }
+          }})
+  
+        window.onNavigate(ROUTES_PATH.NewBill)
+        await new Promise(process.nextTick);
+        const message = await screen.getByText(/Erreur 500/)
+        expect(message).toBeTruthy()
       })
     })
   })
