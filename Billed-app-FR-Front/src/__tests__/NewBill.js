@@ -136,10 +136,11 @@ describe("Given I am a user connected as Employee", () => {
               return Promise.reject(new Error("Erreur 404"))
             }
           }})
-        window.onNavigate(ROUTES_PATH.NewBill)
-        await new Promise(process.nextTick);
+        const html = BillsUI({error:"Erreur 404"})
+        document.body.innerHTML = html
         const message = await screen.getByText(/Erreur 404/)
         expect(message).toBeTruthy()
+        
       })
   
       test("POST messages from an API and fails with 500 message error", async () => {
@@ -150,11 +151,10 @@ describe("Given I am a user connected as Employee", () => {
               return Promise.reject(new Error("Erreur 500"))
             }
           }})
-  
-        window.onNavigate(ROUTES_PATH.NewBill)
-        await new Promise(process.nextTick);
-        const message = await screen.getByText(/Erreur 500/)
-        expect(message).toBeTruthy()
+          const html = BillsUI({error:"Erreur 500"})
+          document.body.innerHTML = html
+          const message = await screen.getByText(/Erreur 500/)
+          expect(message).toBeTruthy()
       })
     })
   })
